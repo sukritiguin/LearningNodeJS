@@ -29,4 +29,14 @@ const sendVerificationEmail = async (userId: string, email: string) => {
     await transpoter.sendMail(mailOptions);
 }
 
-export default sendVerificationEmail;
+const generateToken = (userId: string) => {
+    const accessToken = jwt.sign({id: userId}, config.jwtSecret as string, {expiresIn: '15m'});
+    const refreshToken = jwt.sign({id: userId}, config.jwtSecret as string, {expiresIn: '7d'});
+
+    return {accessToken, refreshToken}
+}
+
+
+
+
+export {sendVerificationEmail, generateToken};

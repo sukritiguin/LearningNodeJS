@@ -7,12 +7,14 @@ what it does: */
 
 import express, { NextFunction, Request, Response } from "express";
 import createHttpError, { HttpError } from "http-errors";
-import { config } from "./config/config";
 import globalErrorHandler from "./middlewares/globalErrorHandler";
 import userRouter from "./user/userRouter";
+import cookieParser from 'cookie-parser';
+
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 // ⁡⁣⁣⁢𝘙𝘰𝘶𝘵𝘦𝘴⁡
 app.get("/", (req, res, next) => {
