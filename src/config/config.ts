@@ -12,7 +12,9 @@ const _config = {
     databaseURL: process.env.MONGO_CONNECTION_STRING,
     env: process.env.NODE_ENV,
     saltOrRounds: process.env.SALT_OR_ROUNDS || '10',
-    jwtSecret: process.env.JWT_SECRET
+    jwtSecret: process.env.JWT_SECRET,
+    emailUser: process.env.EMAIL_USER,
+    emailPassword: process.env.EMAIL_PASS,
 };
 
 export const config = Object.freeze(_config);

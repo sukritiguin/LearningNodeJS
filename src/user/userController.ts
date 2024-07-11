@@ -6,6 +6,8 @@ import bcrypt from "bcrypt"
 import userModel from "./userModel";
 import {config} from "../config/config";
 import { sign } from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
+import sendVerificationEmail from "./sendVerificationEmail.utils";
 
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -47,11 +49,14 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
     try{
         // Token Generation
         const token = sign({sub: newUser._id}, config.jwtSecret as string, {expiresIn: '7d'})
+
+        await sendVerificationEmail(newUser._id.toString(), email);
     
         res.status(201).json({
-            "message": "User created successfully",
+            "message": "User created successfully. Check Email to verify your account",
             "userID": newUser._id,
             "userEmail": newUser.email,
+            "verified": newUser.verified,
             "accessToken": token,
         })
     } catch (error) {
@@ -103,4 +108,38 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
-export {createUser, loginUser};
+const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.query.token as string;
+
+    if(!token) {
+        return next(createHttpError(500, "Token is not provided."))
+    }
+
+    try {
+        const decoded = jwt.verify(token, config.jwtSecret as string) as {id:string};
+        const user = await userModel.findById(decoded.id)
+
+        if(!user) {
+            return next(createHttpError(500, "User not found."))
+        }
+
+        if(user.verified) {
+            return next(createHttpError(500, "User already verified."))
+        }
+
+        user.verified = true;
+
+        await user.save();
+
+        res.status(200).json({
+            "message": "User is verified.",
+            "userId": user._id,
+            "email": user.email,
+            "verified": user.verified
+        })
+    }catch(err) {
+        console.log(err)
+    }
+}
+
+export {createUser, loginUser, verifyEmail};

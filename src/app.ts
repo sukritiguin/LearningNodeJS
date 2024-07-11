@@ -2,6 +2,9 @@
 /* The provided code is a TypeScript file that creates an Express application. Here is a breakdown of
 what it does: */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+
+// npm install -D @types/jsonwebtoken --legacy-peer-deps
+
 import express, { NextFunction, Request, Response } from "express";
 import createHttpError, { HttpError } from "http-errors";
 import { config } from "./config/config";
