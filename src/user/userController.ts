@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { User } from "./userTypes";
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Response, Request } from "express";
@@ -202,24 +203,53 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
-const authenticateJWT = async (
+
+
+const profileProtectedRouter = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    const token = req.header("Authorization")?.split(" ")[1];
-
-    if (!token) {
-        return next(createHttpError(401, "Authentication failed."));
-    }
-
-    jwt.verify(token, config.jwtSecret as string, (err, user) => {
-        if (err) {
-            return next(createHttpError(500, "Token verification failed."));
-        }
-        req.user = user as JwtPayload;
-        next();
+    res.status(200).json({
+        message: "This is a protected router.",
+        info: "You will get the profile the message only if you are logged in.",
+        user: req.user,
     });
 };
 
-export { createUser, loginUser, verifyEmail, refreshAccessToken, logout, authenticateJWT };
+const resendVerificationEmail = async (req:Request, res:Response, next:NextFunction) => {
+    const {email} = req.body;
+    if(!email) {
+        return next(createHttpError(400, "Email is required."));
+    }
+
+    try{
+        const user = await userModel.findOne({ email: email });
+
+        if(!user) {
+            return next(createHttpError(400, "User is not registered."))
+        }
+
+        if(user.verified){
+            return next(createHttpError(400, "User is verified."));
+        }
+
+        await sendVerificationEmail(user._id.toString(), email);
+
+        res.status(200).json({
+            message: "Verification email send check your mail.",
+        });
+    }catch(err){
+        next(err)
+    }
+}
+
+export {
+    createUser,
+    loginUser,
+    verifyEmail,
+    refreshAccessToken,
+    logout,
+    profileProtectedRouter,
+    resendVerificationEmail,
+};
