@@ -37,6 +37,15 @@ const generateToken = (userId: string) => {
 }
 
 
+const getUserId = async (refreshToken: string) => {
+    const decoded = jwt.verify(refreshToken, config.jwtSecret as string) as {
+        id: string;
+    };
+
+    const userId = decoded.id;
+    return userId;
+}
 
 
-export {sendVerificationEmail, generateToken};
+
+export {sendVerificationEmail, generateToken, getUserId};
