@@ -1,6 +1,6 @@
 // eslint-disable @typescript-eslint/no-unused-vars */
 import express from "express";
-import {createBook, updateBook, getAllBooks} from "./book.controller";
+import {createBook, updateBook, getAllBooks, getBook} from "./book.controller";
 import {upload} from "./book.middleware";
 import {authenticateJWT} from "../user/userMiddleware";
 
@@ -18,5 +18,7 @@ bookRouter.patch('/:bookId', authenticateJWT, upload.fields([
 ]), updateBook);
 
 bookRouter.get('/', authenticateJWT, getAllBooks);
+
+bookRouter.get('/book/:bookId', authenticateJWT, getBook);
 
 export default bookRouter;

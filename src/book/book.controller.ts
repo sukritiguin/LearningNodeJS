@@ -202,4 +202,13 @@ const getAllBooks = async (req: Request, res: Response, next: NextFunction) => {
     });
 }
 
-export { createBook, updateBook, getAllBooks };
+const getBook = async (req: Request, res: Response, next: NextFunction) => {
+    const bookId = req.params.bookId;
+    const book = await bookModel.findById(bookId);
+
+    res.status(200).json({
+        'book': book,
+    });
+}
+
+export { createBook, updateBook, getAllBooks, getBook };
