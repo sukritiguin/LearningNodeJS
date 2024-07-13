@@ -15,6 +15,9 @@ const _config = {
     jwtSecret: process.env.JWT_SECRET,
     emailUser: process.env.EMAIL_USER,
     emailPassword: process.env.EMAIL_PASS,
+    cloudinary_cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
+    cloudinary_secret_key: process.env.CLOUDINARY_SECRET_KEY,
 };
 
 export const config = Object.freeze(_config);
