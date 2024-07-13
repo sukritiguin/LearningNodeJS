@@ -125,7 +125,7 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
             coverIMageFileName
         );
     }catch{
-        console.log();
+        //console.log();
     }
 
 
@@ -139,7 +139,7 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
                 fileName
             );
     } catch (error) {
-        console.log();
+        //console.log();
     }
 
     let uploadCoverResult, uploadFileResult;
@@ -153,7 +153,7 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
             }
         );
     } catch (error) {
-        console.log();
+        //console.log();
     }
 
     try {
@@ -164,7 +164,7 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
             format: coverFileMimeType?.split("/").at(-1),
         });
     } catch (error) {
-        console.log();
+        //console.log();
     }
 
     const updatedBook = await bookModel.findOneAndUpdate(
@@ -195,4 +195,11 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
-export { createBook, updateBook };
+const getAllBooks = async (req: Request, res: Response, next: NextFunction) => {
+    const books = await bookModel.find();
+    res.status(200).json({
+        books: books,
+    });
+}
+
+export { createBook, updateBook, getAllBooks };
