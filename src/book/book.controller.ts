@@ -7,7 +7,6 @@ import jwt from "jsonwebtoken";
 
 import bookModel from "./book.model";
 import cloudinary from "../config/cloudinary";
-import { config } from "../config/config";
 import { getUserId } from "../user/utils";
 
 const createBook = async (req: Request, res: Response, next: NextFunction) => {
@@ -211,4 +210,26 @@ const getBook = async (req: Request, res: Response, next: NextFunction) => {
     });
 }
 
-export { createBook, updateBook, getAllBooks, getBook };
+const deleteBook = async (req: Request, res: Response, next: NextFunction) => {
+    try{
+        const bookId = req.params.bookId;
+        const currentUser = await getUserId(req.cookies?.refreshToken || "");
+        const book = await bookModel.findById(bookId);
+
+        if(!book){
+            return next(createHttpError(404, "Book not found"));
+        }
+
+        if(book?.author.toString() !== currentUser.toString()){
+            return next(createHttpError("You are not allowed to delete this book"));
+        }
+
+        await bookModel.deleteOne({_id: bookId});
+
+        res.status(200).json({'message': 'Book deleted successfully'});
+    }catch(err){
+        next(err);
+    }
+}
+
+export { createBook, updateBook, getAllBooks, getBook, deleteBook };
