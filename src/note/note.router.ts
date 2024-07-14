@@ -2,7 +2,7 @@ import express from 'express';
 
 import {authenticateJWT} from "../user/userMiddleware";
 import {upload} from "./note.middleware";
-import {createNote} from "./note.controller";
+import {createNote, deleteNote} from "./note.controller";
 
 
 
@@ -13,5 +13,7 @@ noteRouter.post('/create-note', authenticateJWT, upload.fields([
     {name: 'coverImage', maxCount:1},
     {name: 'file', maxCount:1},
 ]), createNote);
+
+noteRouter.delete('/:noteId', authenticateJWT, deleteNote);
 
 export default noteRouter;

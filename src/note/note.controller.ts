@@ -4,7 +4,7 @@ import fs from "fs";
 import createHttpError from "http-errors";
 import { v4 as uuidv4 } from 'uuid';
 
-import { uploadFileToS3 } from "./utils";
+import { uploadFileToS3, deleteAllVersionsOfObjectFromS3, getObjectKeyFromS3Url } from "./utils";
 import { configAWSS3 } from "../config/aws-config";
 import { getUserId } from "../user/utils";
 import noteModel from "./note.model";
@@ -145,4 +145,45 @@ const createNote = async (req: Request, res: Response, next: NextFunction) => {
 
 }
 
-export { createNote };
+const deleteNote = async (req: Request, res: Response, next: NextFunction) => {
+    const noteId = req.params.noteId;
+
+    const note = await noteModel.findById(noteId);
+    
+    if(!note) {
+        return next(createHttpError(404, 'Note not found.'));
+    }
+
+    const refreshToken = req.cookies?.refreshToken;
+
+    const currentUser = await getUserId(refreshToken);
+
+    if(note?.contributor.toString() !== currentUser.toString() ){
+        return next(createHttpError(500, 'You are not allowed to delete this note.'));
+    }
+
+    const coverImageObjectKey = getObjectKeyFromS3Url(note.coverImage);
+    const fileObjectKey = getObjectKeyFromS3Url(note.file);
+
+    try{
+        await deleteAllVersionsOfObjectFromS3(configAWSS3.bucket as string, coverImageObjectKey);
+        await deleteAllVersionsOfObjectFromS3(configAWSS3.bucket as string, fileObjectKey);
+    }catch(error){
+        console.log(error);
+        return next(createHttpError(500, 'Problem while deleting the files from AWS S3 bucket.'));
+    }
+
+
+    
+    try {
+        await noteModel.deleteOne({_id: noteId});
+    
+    } catch (error) {
+        console.log(error);
+        return next(createHttpError(500, 'Problem while deleting the note object.'));
+    }
+
+    res.status(200).json({message: 'Note deleted successfully.'});
+}
+
+export { createNote, deleteNote };

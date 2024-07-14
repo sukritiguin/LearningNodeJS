@@ -7,6 +7,6 @@ const _config = {
     secret_key: process.env.AWS_IAM_USER_SECREAT_KEY,
     bucket: process.env.AWS_S3_BUCKET,
     region: process.env.AWS_S3_ELIBSTORAGE_REGION,
-}
+};
 
 export const configAWSS3 = Object.freeze(_config);

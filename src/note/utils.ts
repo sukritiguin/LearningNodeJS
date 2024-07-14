@@ -33,7 +33,7 @@
 // export {uploadFileToS3, UploadParams};
 
 
-import { S3Client } from "@aws-sdk/client-s3";
+import { S3Client, DeleteObjectCommand, ListObjectVersionsCommand  } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import fs from "fs";
 
@@ -93,4 +93,84 @@ const uploadFileToS3 = async (
   }
 };
 
-export { uploadFileToS3 };
+// Function to delete an object from S3 bucket
+const deleteObjectFromS3 = async (bucketName: string, objectKey: string) => {
+    try {
+        const params = {
+            Bucket: bucketName,
+            Key: objectKey,
+        };
+
+        const command = new DeleteObjectCommand(params);
+        const data = await s3.send(command);
+        console.log("Object deleted successfully:", data);
+        return data; // Optionally return data or a success message
+    } catch (error) {
+        console.error("Error deleting object:", error);
+        throw error; // Handle the error as per your application's needs
+    }
+};
+
+const getObjectKeyFromS3Url = (url: string) => {
+    // Split the URL by '/'
+    const parts = url.split('/');
+    
+    // The object key will be the last part of the URL
+    const objectKey = parts[parts.length - 1];
+    
+    return objectKey;
+}
+
+// Function to delete all versions of an object from S3 bucket
+const deleteAllVersionsOfObjectFromS3 = async (bucketName: string, objectKey: string) => {
+    try {
+        // List all versions and delete markers of the object
+        const listVersionsCommand = new ListObjectVersionsCommand({
+            Bucket: bucketName,
+            Prefix: objectKey,
+        });
+        const versions = await s3.send(listVersionsCommand);
+
+        if (versions.Versions || versions.DeleteMarkers) {
+            const objectsToDelete = [];
+            if (versions.Versions) {
+                for (const version of versions.Versions) {
+                    objectsToDelete.push({
+                        Key: objectKey,
+                        VersionId: version.VersionId
+                    });
+                }
+            }
+
+            if (versions.DeleteMarkers) {
+                for (const deleteMarker of versions.DeleteMarkers) {
+                    objectsToDelete.push({
+                        Key: objectKey,
+                        VersionId: deleteMarker.VersionId
+                    });
+                }
+            }
+
+            for (const obj of objectsToDelete) {
+                const deleteParams = {
+                    Bucket: bucketName,
+                    Key: obj.Key,
+                    VersionId: obj.VersionId,
+                };
+                const deleteCommand = new DeleteObjectCommand(deleteParams);
+                const data = await s3.send(deleteCommand);
+                console.log("Version or delete marker deleted successfully:", data);
+            }
+        } else {
+            console.log("No versions or delete markers found for the object.");
+        }
+
+        console.log("All versions and delete markers of the object deleted successfully.");
+    } catch (error) {
+        console.error("Error deleting object versions and delete markers:", error);
+        throw error; // Handle the error as per your application's needs
+    }
+};
+
+
+export { uploadFileToS3, getObjectKeyFromS3Url, deleteObjectFromS3, deleteAllVersionsOfObjectFromS3 };
