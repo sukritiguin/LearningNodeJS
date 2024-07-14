@@ -3,7 +3,6 @@ import { Request, Response, NextFunction } from "express";
 import path from "node:path";
 import fs from "node:fs";
 import createHttpError from "http-errors";
-import jwt from "jsonwebtoken";
 
 import bookModel from "./book.model";
 import cloudinary from "../config/cloudinary";
@@ -14,6 +13,7 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
 
     const files = req.files as { [filename: string]: Express.Multer.File[] };
 
+    console.log(files.coverImage);
     const coverImageMimeType = files.coverImage[0].mimetype;
     const coverIMageFileName = files.coverImage[0].filename;
     const coverImageFilePath = path.resolve(

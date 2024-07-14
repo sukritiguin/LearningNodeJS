@@ -12,6 +12,7 @@ import globalErrorHandler from "./middlewares/globalErrorHandler";
 
 import userRouter from "./user/userRouter";
 import bookRouter from "./book/book.router";
+import noteRouter from "./note/note.router";
 
 import cookieParser from 'cookie-parser';
 
@@ -37,6 +38,8 @@ app.get("/", (req, res, next) => {
 
 app.use('/api/users' ,userRouter);
 app.use('/api/books', bookRouter);
+app.use('/api/notes', noteRouter);
+
 
 // Global error handler
 

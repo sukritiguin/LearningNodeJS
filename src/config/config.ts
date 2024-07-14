@@ -20,4 +20,5 @@ const _config = {
     cloudinary_secret_key: process.env.CLOUDINARY_SECRET_KEY,
 };
 
+
 export const config = Object.freeze(_config);
